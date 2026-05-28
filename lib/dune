@@ -3,7 +3,6 @@
  (public_name pgn_to_tex)
  (libraries sedlex menhirLib)
  (modules ast parser lexer parsing latex latex_helpers pgn2tex nag)
- (private_modules ast parser lexer parsing latex latex_helpers nag)
  (preprocess
   (pps sedlex.ppx)))
 
