@@ -13,7 +13,7 @@
 
 (maintainers "Owen Rees <owenrees.dev@gmail.com>")
 
-(license AGPLv3)
+(license AGPL-3.0-or-later)
 
 (documentation https://github.com/TheRealOwenRees/pgn_to_tex/README.md)
 

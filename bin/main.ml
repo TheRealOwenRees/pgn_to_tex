@@ -31,5 +31,7 @@ let convert_js pgn_js diagram_json_js display_clock =
   let result = Pgn2tex.to_tex pgn ~diagram_data ~clock:display_clock in
   Js.string result
 
+let to_tex pgn ~diagram_data ~clock = Pgn2tex.to_tex pgn ~diagram_data ~clock
+
 (* Exporting the module to the global JavaScript scope *)
-let () = Js.export "convert" (Js.wrap_callback convert_js)
+let () = Js.export "to_tex" (Js.wrap_callback convert_js)

@@ -6,7 +6,7 @@ description:
   "Convert PGN files to LaTeX markdown, including rendered images of selected positions"
 maintainer: ["Owen Rees <owenrees.dev@gmail.com>"]
 authors: ["Owen Rees <owenrees.dev@gmail.com>"]
-license: "AGPLv3"
+license: "AGPL-3.0-or-later"
 tags: ["pgn" "latex" "chess" "parser"]
 homepage: "https://github.com/therealowenrees/pgn_to_tex"
 doc: "https://github.com/TheRealOwenRees/pgn_to_tex/README.md"
