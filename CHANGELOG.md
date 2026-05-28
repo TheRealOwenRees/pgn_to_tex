@@ -1,3 +1,7 @@
+## v0.0.1-rc.2
+
+- add correct versioning metadata
+
 ## v0.0.1-rc.1
 
 - Update readme and add license file

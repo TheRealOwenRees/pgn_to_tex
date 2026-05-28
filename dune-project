@@ -17,7 +17,7 @@
 
 (documentation https://github.com/TheRealOwenRees/pgn_to_tex/README.md)
 
-(version 0.0.1)
+(version 0.0.1-rc.2)
 
 (package
  (name pgn_to_tex)
