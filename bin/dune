@@ -1,0 +1,4 @@
+(executable
+ (public_name pgn_to_tex)
+ (name main)
+ (libraries pgn_to_tex))
