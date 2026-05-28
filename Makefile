@@ -4,7 +4,7 @@ clean:
 	dune clean
 
 build: 
-	dune build bin/pgn_to_tex.cjs --profile release
+	dune build --profile release
 
 test:
 	dune runtest
