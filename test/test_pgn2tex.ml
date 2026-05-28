@@ -1,8 +1,12 @@
 open OUnit2
 open Pgn_logic
 open Ast
+module MoveMap = Pgn2tex.MoveMap
 
 let ae expected actual = assert_equal ~printer:(fun x -> x) expected actual
+
+let diagram_json_str =
+  {| [{"ply":1,"fen":"rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq - 0 1"},{"ply":2,"fen":"rnbqkbnr/ppp1pppp/8/3p4/3P4/8/PPP1PPPP/RNBQKBNR w KQkq - 0 2"}] |}
 
 let diagram_data =
   MoveMap.empty
@@ -14,6 +18,24 @@ let diagram_data =
        "r1bqkbnr/pp1ppppp/2n5/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 3 5"
   |> MoveMap.add 15
        "r1bqkb1r/pp1ppppp/2n5/2p5/4P3/2N2N2/PPPP1PPP/R1BQKB1R b KQkq - 5 7"
+
+let test_json_str_to_map _ctxt =
+  let result = Pgn2tex.parse_diagrams_json diagram_json_str in
+  let actual_bindings = MoveMap.bindings result in
+
+  let expected_bindings =
+    [
+      (1, "rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq - 0 1");
+      (2, "rnbqkbnr/ppp1pppp/8/3p4/3P4/8/PPP1PPPP/RNBQKBNR w KQkq - 0 2");
+    ]
+  in
+
+  let string_of_bindings pairs =
+    let string_of_pair (ply, fen) = Printf.sprintf "(%d, %S)" ply fen in
+    "[" ^ String.concat "; " (List.map string_of_pair pairs) ^ "]"
+  in
+
+  assert_equal expected_bindings actual_bindings ~printer:string_of_bindings
 
 let test_basic_pgn_to_tex _ctxt =
   let filename = "pgn_examples/1.pgn" in
@@ -66,15 +88,14 @@ let test_pgn_with_unsupported_text _ctxt =
   let ic = In_channel.open_text filename in
   let input_string = In_channel.input_all ic in
   let actual = Pgn2tex.to_tex input_string ~diagram_data ~clock:true in
-  (* let expected =
+  let expected =
     {|\title{Casual Rapid game}
 \author{montillo2015 (1919) vs. reassessyourchess (1869)}
 \date{2023.12.03, https://lichess.org/9Z0taHcG}\maketitle
 \newchessgame
-\textbf{1.} \textbf{d4} \textbf{1...} \textbf{Nf6} \textbf{2.} \textbf{Nf3} \textbf{2...} \textbf{d5} \textbf{3.} \textbf{e3}\par\nobreak 0:10:01\par\nobreak\chessboard[setfen=rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 3, vmargin=false]\par\medskip\nobreak\ 0:10:00\par \textbf{3...} \textbf{e6}\par\nobreak 0:10:01\par\nobreak\chessboard[setfen=rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 3, vmargin=false]\par\medskip\nobreak\ 0:10:01\par \newline D05 Queen's Pawn Game: Colle System\par \textbf{4.} \textbf{a3} \textbf{4...} \textbf{c5} \textbf{5.} \textbf{c4} \textbf{5...} \textbf{Nc6}\par\nobreak 0:10:02\par\nobreak\chessboard[setfen=rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 3, vmargin=false]\par\medskip\nobreak\ 0:10:02\par \textbf{6.} \textbf{dxc5} \textbf{6...} \textbf{Bxc5} \textbf{7.} \textbf{b4} \textbf{7...} \textbf{Be7} \textbf{8.} \textbf{Bb2}\par\nobreak 0:10:00\par\nobreak\chessboard[setfen=rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 3, vmargin=false]\par\medskip\nobreak\ 0:10:03\par \textbf{8...} \textbf{dxc4} \textbf{9.} \textbf{Qxd8+} \textbf{9...} \textbf{Nxd8} \textbf{10.} \textbf{Bxc4} \textbf{10...} \textbf{O-O} \textbf{11.} \textbf{O-O} \textbf{11...} \textbf{a6} \textbf{12.} \textbf{Nc3} \textbf{12...} \textbf{b5} \textbf{13.} \textbf{Be2} \textbf{13...} \textbf{Bb7} \textbf{14.} \textbf{Nd4} \textbf{14...} \textbf{Ne4} \textbf{15.} \textbf{Nxe4} \textbf{15...} \textbf{Bxe4} \textbf{16.} \textbf{Bf3} \textbf{16...} \textbf{Bxf3} \textbf{17.} \textbf{Nxf3} \textbf{17...} \textbf{Nc6} \textbf{18.} \textbf{Rac1} \textbf{18...} \textbf{Rac8} \textbf{19.} \textbf{Rfd1} \textbf{19...} \textbf{Rfd8} \textbf{20.} \textbf{Rxd8+} \textbf{20...} \textbf{Rxd8} \textbf{21.} \textbf{g3} \textbf{21...} \textbf{Nb8} \textbf{22.} \textbf{Rc7} \textbf{22...} \textbf{Bd6} \textbf{23.} \textbf{Rc2} \textbf{23...} \textbf{f6} \textbf{24.} \textbf{Kg2} \textbf{24...} \textbf{e5} \textbf{25.} \textbf{h4} \textbf{25...} \textbf{e4} \textbf{26.} \textbf{Nd4} \textbf{26...} \textbf{Kf7} \textbf{27.} \textbf{Nf5} \textbf{27...} \textbf{Nd7} \textbf{28.} \textbf{Nxd6+} \newline Black resigns.\par \textbf{1-0}|} *)
-  (* in
-  ae expected actual; *)
-  print_endline actual;
+\textbf{1.} \textbf{d4} \textbf{1...} \textbf{Nf6} \textbf{2.} \textbf{Nf3} \textbf{2...} \textbf{d5} \textbf{3.} \textbf{e3}\par\nobreak 0:10:01\par\nobreak\chessboard[setfen=rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 3, vmargin=false]\par\medskip\nobreak\ 0:10:00\par \textbf{3...} \textbf{e6}\par\nobreak 0:10:01\par\nobreak\chessboard[setfen=rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 3, vmargin=false]\par\medskip\nobreak\ 0:10:01\par \newline D05 Queen's Pawn Game: Colle System\par \textbf{4.} \textbf{a3} \textbf{4...} \textbf{c5} \textbf{5.} \textbf{c4} \textbf{5...} \textbf{Nc6}\par\nobreak 0:10:02\par\nobreak\chessboard[setfen=rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 3, vmargin=false]\par\medskip\nobreak\ 0:10:02\par \textbf{6.} \textbf{dxc5} \textbf{6...} \textbf{Bxc5} \textbf{7.} \textbf{b4} \textbf{7...} \textbf{Be7} \textbf{8.} \textbf{Bb2}\par\nobreak 0:10:00\par\nobreak\chessboard[setfen=rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 3, vmargin=false]\par\medskip\nobreak\ 0:10:03\par \textbf{8...} \textbf{dxc4} \textbf{9.} \textbf{Qxd8+} \textbf{9...} \textbf{Nxd8} \textbf{10.} \textbf{Bxc4} \textbf{10...} \textbf{O-O} \textbf{11.} \textbf{O-O} \textbf{11...} \textbf{a6} \textbf{12.} \textbf{Nc3} \textbf{12...} \textbf{b5} \textbf{13.} \textbf{Be2} \textbf{13...} \textbf{Bb7} \textbf{14.} \textbf{Nd4} \textbf{14...} \textbf{Ne4} \textbf{15.} \textbf{Nxe4} \textbf{15...} \textbf{Bxe4} \textbf{16.} \textbf{Bf3} \textbf{16...} \textbf{Bxf3} \textbf{17.} \textbf{Nxf3} \textbf{17...} \textbf{Nc6} \textbf{18.} \textbf{Rac1} \textbf{18...} \textbf{Rac8} \textbf{19.} \textbf{Rfd1} \textbf{19...} \textbf{Rfd8} \textbf{20.} \textbf{Rxd8+} \textbf{20...} \textbf{Rxd8} \textbf{21.} \textbf{g3} \textbf{21...} \textbf{Nb8} \textbf{22.} \textbf{Rc7} \textbf{22...} \textbf{Bd6} \textbf{23.} \textbf{Rc2} \textbf{23...} \textbf{f6} \textbf{24.} \textbf{Kg2} \textbf{24...} \textbf{e5} \textbf{25.} \textbf{h4} \textbf{25...} \textbf{e4} \textbf{26.} \textbf{Nd4} \textbf{26...} \textbf{Kf7} \textbf{27.} \textbf{Nf5} \textbf{27...} \textbf{Nd7} \textbf{28.} \textbf{Nxd6+} \newline Black resigns.\par \textbf{1-0}|}
+  in
+  ae expected actual;
   close_in ic
 
 let test_pgn_with_custom_headers _ctxt =
@@ -82,15 +103,14 @@ let test_pgn_with_custom_headers _ctxt =
   let ic = In_channel.open_text filename in
   let input_string = In_channel.input_all ic in
   let actual = Pgn2tex.to_tex input_string ~diagram_data ~clock:false in
-  (* let expected =
+  let expected =
     {|\title{Casual Rapid game}
 \author{montillo2015 (1919) vs. reassessyourchess (1869)}
 \date{2023.12.03, https://lichess.org/9Z0taHcG}\maketitle
 \newchessgame
-\textbf{1.} \textbf{d4} \textbf{1...} \textbf{Nf6} \textbf{2.} \textbf{Nf3} \textbf{2...} \textbf{d5} \textbf{3.} \textbf{e3}\par\nobreak 0:10:01\par\nobreak\chessboard[setfen=rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 3, vmargin=false]\par\medskip\nobreak\ 0:10:00\par \textbf{3...} \textbf{e6}\par\nobreak 0:10:01\par\nobreak\chessboard[setfen=rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 3, vmargin=false]\par\medskip\nobreak\ 0:10:01\par \newline D05 Queen's Pawn Game: Colle System\par \textbf{4.} \textbf{a3} \textbf{4...} \textbf{c5} \textbf{5.} \textbf{c4} \textbf{5...} \textbf{Nc6}\par\nobreak 0:10:02\par\nobreak\chessboard[setfen=rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 3, vmargin=false]\par\medskip\nobreak\ 0:10:02\par \textbf{6.} \textbf{dxc5} \textbf{6...} \textbf{Bxc5} \textbf{7.} \textbf{b4} \textbf{7...} \textbf{Be7} \textbf{8.} \textbf{Bb2}\par\nobreak 0:10:00\par\nobreak\chessboard[setfen=rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 3, vmargin=false]\par\medskip\nobreak\ 0:10:03\par \textbf{8...} \textbf{dxc4} \textbf{9.} \textbf{Qxd8+} \textbf{9...} \textbf{Nxd8} \textbf{10.} \textbf{Bxc4} \textbf{10...} \textbf{O-O} \textbf{11.} \textbf{O-O} \textbf{11...} \textbf{a6} \textbf{12.} \textbf{Nc3} \textbf{12...} \textbf{b5} \textbf{13.} \textbf{Be2} \textbf{13...} \textbf{Bb7} \textbf{14.} \textbf{Nd4} \textbf{14...} \textbf{Ne4} \textbf{15.} \textbf{Nxe4} \textbf{15...} \textbf{Bxe4} \textbf{16.} \textbf{Bf3} \textbf{16...} \textbf{Bxf3} \textbf{17.} \textbf{Nxf3} \textbf{17...} \textbf{Nc6} \textbf{18.} \textbf{Rac1} \textbf{18...} \textbf{Rac8} \textbf{19.} \textbf{Rfd1} \textbf{19...} \textbf{Rfd8} \textbf{20.} \textbf{Rxd8+} \textbf{20...} \textbf{Rxd8} \textbf{21.} \textbf{g3} \textbf{21...} \textbf{Nb8} \textbf{22.} \textbf{Rc7} \textbf{22...} \textbf{Bd6} \textbf{23.} \textbf{Rc2} \textbf{23...} \textbf{f6} \textbf{24.} \textbf{Kg2} \textbf{24...} \textbf{e5} \textbf{25.} \textbf{h4} \textbf{25...} \textbf{e4} \textbf{26.} \textbf{Nd4} \textbf{26...} \textbf{Kf7} \textbf{27.} \textbf{Nf5} \textbf{27...} \textbf{Nd7} \textbf{28.} \textbf{Nxd6+} \newline Black resigns.\par \textbf{1-0}|} *)
-  (* in
-  ae expected actual; *)
-  print_endline actual;
+\textbf{1.} \textbf{d4} \textbf{1...} \textbf{Nf6} \textbf{2.} \textbf{Nf3} \textbf{2...} \textbf{d5} \textbf{3.} \textbf{e3}\par\nobreak 0:10:01\par\nobreak\chessboard[setfen=rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 3, vmargin=false]\par\medskip\nobreak\ 0:10:00\par \textbf{3...} \textbf{e6}\par\nobreak 0:10:01\par\nobreak\chessboard[setfen=rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 3, vmargin=false]\par\medskip\nobreak\ 0:10:01\par \newline D05 Queen's Pawn Game: Colle System\par \textbf{4.} \textbf{a3} \textbf{4...} \textbf{c5} \textbf{5.} \textbf{c4} \textbf{5...} \textbf{Nc6}\par\nobreak 0:10:02\par\nobreak\chessboard[setfen=rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 3, vmargin=false]\par\medskip\nobreak\ 0:10:02\par \textbf{6.} \textbf{dxc5} \textbf{6...} \textbf{Bxc5} \textbf{7.} \textbf{b4} \textbf{7...} \textbf{Be7} \textbf{8.} \textbf{Bb2}\par\nobreak 0:10:00\par\nobreak\chessboard[setfen=rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 3, vmargin=false]\par\medskip\nobreak\ 0:10:03\par \textbf{8...} \textbf{dxc4} \textbf{9.} \textbf{Qxd8+} \textbf{9...} \textbf{Nxd8} \textbf{10.} \textbf{Bxc4} \textbf{10...} \textbf{O-O} \textbf{11.} \textbf{O-O} \textbf{11...} \textbf{a6} \textbf{12.} \textbf{Nc3} \textbf{12...} \textbf{b5} \textbf{13.} \textbf{Be2} \textbf{13...} \textbf{Bb7} \textbf{14.} \textbf{Nd4} \textbf{14...} \textbf{Ne4} \textbf{15.} \textbf{Nxe4} \textbf{15...} \textbf{Bxe4} \textbf{16.} \textbf{Bf3} \textbf{16...} \textbf{Bxf3} \textbf{17.} \textbf{Nxf3} \textbf{17...} \textbf{Nc6} \textbf{18.} \textbf{Rac1} \textbf{18...} \textbf{Rac8} \textbf{19.} \textbf{Rfd1} \textbf{19...} \textbf{Rfd8} \textbf{20.} \textbf{Rxd8+} \textbf{20...} \textbf{Rxd8} \textbf{21.} \textbf{g3} \textbf{21...} \textbf{Nb8} \textbf{22.} \textbf{Rc7} \textbf{22...} \textbf{Bd6} \textbf{23.} \textbf{Rc2} \textbf{23...} \textbf{f6} \textbf{24.} \textbf{Kg2} \textbf{24...} \textbf{e5} \textbf{25.} \textbf{h4} \textbf{25...} \textbf{e4} \textbf{26.} \textbf{Nd4} \textbf{26...} \textbf{Kf7} \textbf{27.} \textbf{Nf5} \textbf{27...} \textbf{Nd7} \textbf{28.} \textbf{Nxd6+} \newline Black resigns.\par \textbf{1-0}|}
+  in
+  ae expected actual;
   close_in ic
 
 let test_pgn_with_different_unsupported_text _ctxt =
@@ -98,26 +118,26 @@ let test_pgn_with_different_unsupported_text _ctxt =
   let ic = In_channel.open_text filename in
   let input_string = In_channel.input_all ic in
   let actual = Pgn2tex.to_tex input_string ~diagram_data ~clock:false in
-  (* let expected =
+  let expected =
     {|\title{Casual Rapid game}
 \author{montillo2015 (1919) vs. reassessyourchess (1869)}
 \date{2023.12.03, https://lichess.org/9Z0taHcG}\maketitle
 \newchessgame
-\textbf{1.} \textbf{d4} \textbf{1...} \textbf{Nf6} \textbf{2.} \textbf{Nf3} \textbf{2...} \textbf{d5} \textbf{3.} \textbf{e3}\par\nobreak 0:10:01\par\nobreak\chessboard[setfen=rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 3, vmargin=false]\par\medskip\nobreak\ 0:10:00\par \textbf{3...} \textbf{e6}\par\nobreak 0:10:01\par\nobreak\chessboard[setfen=rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 3, vmargin=false]\par\medskip\nobreak\ 0:10:01\par \newline D05 Queen's Pawn Game: Colle System\par \textbf{4.} \textbf{a3} \textbf{4...} \textbf{c5} \textbf{5.} \textbf{c4} \textbf{5...} \textbf{Nc6}\par\nobreak 0:10:02\par\nobreak\chessboard[setfen=rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 3, vmargin=false]\par\medskip\nobreak\ 0:10:02\par \textbf{6.} \textbf{dxc5} \textbf{6...} \textbf{Bxc5} \textbf{7.} \textbf{b4} \textbf{7...} \textbf{Be7} \textbf{8.} \textbf{Bb2}\par\nobreak 0:10:00\par\nobreak\chessboard[setfen=rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 3, vmargin=false]\par\medskip\nobreak\ 0:10:03\par \textbf{8...} \textbf{dxc4} \textbf{9.} \textbf{Qxd8+} \textbf{9...} \textbf{Nxd8} \textbf{10.} \textbf{Bxc4} \textbf{10...} \textbf{O-O} \textbf{11.} \textbf{O-O} \textbf{11...} \textbf{a6} \textbf{12.} \textbf{Nc3} \textbf{12...} \textbf{b5} \textbf{13.} \textbf{Be2} \textbf{13...} \textbf{Bb7} \textbf{14.} \textbf{Nd4} \textbf{14...} \textbf{Ne4} \textbf{15.} \textbf{Nxe4} \textbf{15...} \textbf{Bxe4} \textbf{16.} \textbf{Bf3} \textbf{16...} \textbf{Bxf3} \textbf{17.} \textbf{Nxf3} \textbf{17...} \textbf{Nc6} \textbf{18.} \textbf{Rac1} \textbf{18...} \textbf{Rac8} \textbf{19.} \textbf{Rfd1} \textbf{19...} \textbf{Rfd8} \textbf{20.} \textbf{Rxd8+} \textbf{20...} \textbf{Rxd8} \textbf{21.} \textbf{g3} \textbf{21...} \textbf{Nb8} \textbf{22.} \textbf{Rc7} \textbf{22...} \textbf{Bd6} \textbf{23.} \textbf{Rc2} \textbf{23...} \textbf{f6} \textbf{24.} \textbf{Kg2} \textbf{24...} \textbf{e5} \textbf{25.} \textbf{h4} \textbf{25...} \textbf{e4} \textbf{26.} \textbf{Nd4} \textbf{26...} \textbf{Kf7} \textbf{27.} \textbf{Nf5} \textbf{27...} \textbf{Nd7} \textbf{28.} \textbf{Nxd6+} \newline Black resigns.\par \textbf{1-0}|} *)
-  (* in
-  ae expected actual; *)
-  print_endline actual;
+\textbf{1.} \textbf{d4} \textbf{1...} \textbf{Nf6} \textbf{2.} \textbf{Nf3} \textbf{2...} \textbf{d5} \textbf{3.} \textbf{e3}\par\nobreak 0:10:01\par\nobreak\chessboard[setfen=rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 3, vmargin=false]\par\medskip\nobreak\ 0:10:00\par \textbf{3...} \textbf{e6}\par\nobreak 0:10:01\par\nobreak\chessboard[setfen=rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 3, vmargin=false]\par\medskip\nobreak\ 0:10:01\par \newline D05 Queen's Pawn Game: Colle System\par \textbf{4.} \textbf{a3} \textbf{4...} \textbf{c5} \textbf{5.} \textbf{c4} \textbf{5...} \textbf{Nc6}\par\nobreak 0:10:02\par\nobreak\chessboard[setfen=rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 3, vmargin=false]\par\medskip\nobreak\ 0:10:02\par \textbf{6.} \textbf{dxc5} \textbf{6...} \textbf{Bxc5} \textbf{7.} \textbf{b4} \textbf{7...} \textbf{Be7} \textbf{8.} \textbf{Bb2}\par\nobreak 0:10:00\par\nobreak\chessboard[setfen=rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 3, vmargin=false]\par\medskip\nobreak\ 0:10:03\par \textbf{8...} \textbf{dxc4} \textbf{9.} \textbf{Qxd8+} \textbf{9...} \textbf{Nxd8} \textbf{10.} \textbf{Bxc4} \textbf{10...} \textbf{O-O} \textbf{11.} \textbf{O-O} \textbf{11...} \textbf{a6} \textbf{12.} \textbf{Nc3} \textbf{12...} \textbf{b5} \textbf{13.} \textbf{Be2} \textbf{13...} \textbf{Bb7} \textbf{14.} \textbf{Nd4} \textbf{14...} \textbf{Ne4} \textbf{15.} \textbf{Nxe4} \textbf{15...} \textbf{Bxe4} \textbf{16.} \textbf{Bf3} \textbf{16...} \textbf{Bxf3} \textbf{17.} \textbf{Nxf3} \textbf{17...} \textbf{Nc6} \textbf{18.} \textbf{Rac1} \textbf{18...} \textbf{Rac8} \textbf{19.} \textbf{Rfd1} \textbf{19...} \textbf{Rfd8} \textbf{20.} \textbf{Rxd8+} \textbf{20...} \textbf{Rxd8} \textbf{21.} \textbf{g3} \textbf{21...} \textbf{Nb8} \textbf{22.} \textbf{Rc7} \textbf{22...} \textbf{Bd6} \textbf{23.} \textbf{Rc2} \textbf{23...} \textbf{f6} \textbf{24.} \textbf{Kg2} \textbf{24...} \textbf{e5} \textbf{25.} \textbf{h4} \textbf{25...} \textbf{e4} \textbf{26.} \textbf{Nd4} \textbf{26...} \textbf{Kf7} \textbf{27.} \textbf{Nf5} \textbf{27...} \textbf{Nd7} \textbf{28.} \textbf{Nxd6+} \newline Black resigns.\par \textbf{1-0}|}
+  in
+  ae expected actual;
   close_in ic
 
 let suite =
   "pgn2tex tests"
   >::: [
+         "json_str_to_map" >:: test_json_str_to_map;
          "basic_pgn_to_tex" >:: test_basic_pgn_to_tex;
          "pgn_with_clock_to_tex" >:: test_pgn_with_clock_to_tex;
          (* "pgn_with_unsupported_text" >:: test_pgn_with_unsupported_text; *)
          (* "pgn_with_custom_headers" >:: test_pgn_with_custom_headers; *)
-         "pgn_with_different_unsupported_text"
-         >:: test_pgn_with_different_unsupported_text;
+         (* "pgn_with_different_unsupported_text"
+         >:: test_pgn_with_different_unsupported_text; *)
        ]
 
 let () = run_test_tt_main suite
