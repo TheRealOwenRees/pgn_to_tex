@@ -1,3 +1,6 @@
 (test
- (name test_pgn_to_tex)
- (libraries pgn_to_tex))
+ (name test_suite)
+ (modules (:standard))
+ (libraries ounit2 sedlex sedlex.ppx pgn_to_tex helpers)
+ (deps
+  (source_tree pgn_examples)))

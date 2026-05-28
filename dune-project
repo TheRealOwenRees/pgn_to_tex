@@ -1,5 +1,7 @@
 (lang dune 3.21)
 
+(using menhir 3.0)
+
 (name pgn_to_tex)
 
 (generate_opam_files true)
@@ -11,9 +13,11 @@
 
 (maintainers "Owen Rees <owenrees.dev@gmail.com>")
 
-(license AGPLv3)
+(license AGPL-3.0-or-later)
 
-(documentation https://url/to/documentation)
+(documentation https://github.com/TheRealOwenRees/pgn_to_tex/README.md)
+
+(version 0.0.1)
 
 (package
  (name pgn_to_tex)
