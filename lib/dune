@@ -1,2 +1,10 @@
 (library
- (name pgn_to_tex))
+ (name pgn_logic)
+ (public_name pgn_to_tex)
+ (libraries sedlex menhirLib)
+ (modules ast parser lexer parsing latex latex_helpers pgn2tex nag)
+ (preprocess
+  (pps sedlex.ppx)))
+
+(menhir
+ (modules parser))
