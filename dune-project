@@ -15,9 +15,10 @@
 
 (license AGPL-3.0-or-later)
 
-(documentation https://github.com/TheRealOwenRees/pgn_to_tex/README.md)
+(documentation
+ https://github.com/therealowenrees/pgn_to_tex/blob/main/README.md)
 
-(version 0.0.1-rc.2)
+(version 0.0.1)
 
 (package
  (name pgn_to_tex)
