@@ -1,3 +1,8 @@
+## v0.0.1
+
+- fix bug whereby a `subtitle` custom PGN header was rendering on a separate page. It now appears under the title
+- remove old tests and commented out code
+
 ## v0.0.1-rc.2
 
 - add correct versioning metadata

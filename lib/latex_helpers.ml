@@ -34,7 +34,7 @@ let build_title_string event title subtitle =
   match (event, title, subtitle) with
   | event, "", "" -> "\\title{" ^ escape_tex event ^ "}"
   | _event, title, subtitle ->
-      "\\title{" ^ title ^ "}\\\\[2ex]\\large{" ^ subtitle ^ "}"
+      "\\title{" ^ title ^ "\\\\[2ex]\\large{" ^ subtitle ^ "}}"
 
 (* Date and Site string builder *)
 let build_date_site_string date site =

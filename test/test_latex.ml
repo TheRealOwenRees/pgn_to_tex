@@ -111,7 +111,7 @@ let test_title =
       ae "\\title{some event}"
         (Latex_helpers.build_title_string "some event" "" "") );
     ( "Title and subtitle" >:: fun _ ->
-      ae "\\title{Some title}\\\\[2ex]\\large{Some subtitle}"
+      ae "\\title{Some title\\\\[2ex]\\large{Some subtitle}}"
         (Latex_helpers.build_title_string "irrelevant" "Some title"
            "Some subtitle") );
   ]
