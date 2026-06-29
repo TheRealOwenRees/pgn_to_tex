@@ -28,15 +28,3 @@ let parse_pgn s =
   in
   try MenhirLib.Convert.Simplified.traditional2revised Parser.main provider
   with _ -> failwith "Parse error"
-
-(* let parse_diagram_json json_str =
-  let json = Yojson.Basic.from_string json_str in
-  let json_assoc = Yojson.Basic.Util.to_assoc json in
-
-  List.fold_left
-    (fun acc (key_str, json_value) ->
-      let value_string = Yojson.Basic.Util.to_string json_value in
-      match int_of_string_opt key_str with
-      | Some k -> Pgn2tex.MoveMap.add k value_string acc
-      | None -> acc)
-    Pgn2tex.MoveMap.empty json_assoc *)
