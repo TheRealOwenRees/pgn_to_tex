@@ -1,4 +1,5 @@
 module MoveMap = Ast.MoveMap
+module PathMap = Ast.PathMap
 
 (* escape strings for LaTeX *)
 let escape_tex s =
@@ -44,20 +45,48 @@ let build_date_site_string date site =
   | d, "" -> "\\date{" ^ d ^ "}"
   | d, s -> "\\date{" ^ d ^ ", " ^ s ^ "}"
 
-(* generate a diagram with or without clock times from the passed in Map (JSON in JS) *)
-let get_diagram ?(clock = false) ?(white_time = "0:00") ?(black_time = "0:00")
-    ply diagram_data =
-  match MoveMap.find_opt ply diagram_data with
+(* board size options: mainline diagrams use the default size, variation
+   diagrams use the smaller "smallboard" so they don't dominate the subline *)
+let board_options small = if small then ", smallboard" else ""
+
+(* emit a diagram with or without clock times *)
+let diagram_tex ?(clock = false) ?(white_time = "0:00") ?(black_time = "0:00")
+    ?(small = false) fen =
+  let size = board_options small in
+  if not clock then
+    "\n\\par\\nobreak\\medskip\\chessboard[setfen=" ^ fen ^ ", vmargin=false"
+    ^ size ^ "]\\par\\medskip\n"
+  else
+    "\\par\\medskip\\noindent" ^ "\\begin{minipage}{\\linewidth}" ^ black_time
+    ^ "\\par\\nopagebreak\\smallskip\n" ^ "\\chessboard[setfen=" ^ fen
+    ^ ", vmargin=false" ^ size ^ "]\\par\\nopagebreak\\vspace{1em}\n"
+    ^ white_time ^ "\\end{minipage}\\par\\medskip"
+
+(* look up a diagram by its SAN path (root -> position, space separated) *)
+let get_diagram_by_path ?(clock = false) ?(white_time = "0:00")
+    ?(black_time = "0:00") ?(small = false) ~path diagram_data =
+  match PathMap.find_opt path diagram_data.Ast.by_path with
   | None -> None
-  | Some fen ->
-      if not clock then
-        Some
-          ("\n\\par\\nobreak\\medskip\\chessboard[setfen=" ^ fen
-         ^ ", vmargin=false]\\par\\medskip\n")
-      else
-        Some
-          ("\\par\\medskip\\noindent" ^ "\\begin{minipage}{\\linewidth}"
-         ^ black_time ^ "\\par\\nopagebreak\\smallskip\n"
-         ^ "\\chessboard[setfen=" ^ fen
-         ^ ", vmargin=false]\\par\\nopagebreak\\vspace{1em}\n" ^ white_time
-         ^ "\\end{minipage}\\par\\medskip")
+  | Some fen -> Some (diagram_tex ~clock ~white_time ~black_time ~small fen)
+
+(* look up a diagram by ply (legacy mainline keying) *)
+let get_diagram_by_ply ?(clock = false) ?(white_time = "0:00")
+    ?(black_time = "0:00") ply diagram_data =
+  match MoveMap.find_opt ply diagram_data.Ast.by_ply with
+  | None -> None
+  | Some fen -> Some (diagram_tex ~clock ~white_time ~black_time fen)
+
+(* Prefer the path lookup, falling back to ply for older payloads that only
+   carry a mainline ply. *)
+let get_diagram ?(clock = false) ?(white_time = "0:00") ?(black_time = "0:00")
+    ?(small = false) ?path ~ply diagram_data =
+  let by_path =
+    match path with
+    | Some path ->
+        get_diagram_by_path ~clock ~white_time ~black_time ~small ~path
+          diagram_data
+    | None -> None
+  in
+  match by_path with
+  | Some _ as diagram -> diagram
+  | None -> get_diagram_by_ply ~clock ~white_time ~black_time ply diagram_data
