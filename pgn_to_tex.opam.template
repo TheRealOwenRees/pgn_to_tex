@@ -1,0 +1,5 @@
+x-ci-accept-failures: [
+  "ocaml-base-compiler < 5.1.0"
+  "ocaml-system < 5.1.0"
+  "ocaml-variants < 5.1.0"
+]
