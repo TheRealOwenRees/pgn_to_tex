@@ -105,7 +105,9 @@ and render_game is_mainline ?(diagram_data = Ast.empty_diagrams)
                 if is_mainline then
                   get_diagram ~path:(path_key next_path) ~ply:next_ply ~clock
                     ~white_time ~black_time diagram_data
-                else get_diagram_by_path ~path:(path_key next_path) diagram_data
+                else
+                  get_diagram_by_path ~path:(path_key next_path) ~small:true
+                    diagram_data
               else None
             in
 

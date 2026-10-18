@@ -70,7 +70,10 @@ let test_variation_diagram_to_tex _ctxt =
   let diagrams = Pgn2tex.parse_diagrams_json variation_diagram_json_str in
   let rendered = Pgn2tex.to_tex pgn ~diagram_data:diagrams ~clock:false in
   let diagram =
-    match Latex_helpers.get_diagram_by_path ~path:"e4 e5 Nf3 d6" diagrams with
+    match
+      Latex_helpers.get_diagram_by_path ~path:"e4 e5 Nf3 d6" ~small:true
+        diagrams
+    with
     | Some d -> d
     | None -> assert_failure "variation diagram not found by path"
   in
@@ -84,7 +87,9 @@ let test_variation_diagram_to_tex _ctxt =
   let expected_fragment = "( 2... d6" ^ embedded ^ " )" in
   assert_bool
     (Printf.sprintf "variation diagram misplaced in:\n%s" rendered)
-    (contains ~needle:expected_fragment rendered)
+    (contains ~needle:expected_fragment rendered);
+  assert_bool "variation diagram should use smallboard"
+    (contains ~needle:"smallboard" rendered)
 
 let test_basic_pgn_to_tex _ctxt =
   let filename = "pgn_examples/1.pgn" in
