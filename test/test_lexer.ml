@@ -170,9 +170,33 @@ let test_clock_in_comment _ctxt =
   in
   assert_tokens ~ctxt:_ctxt ~input ~is_header:false ~expected
 
+let test_header_unterminated_string_raises _ctxt =
+  let input = {|Event "oops|} in
+  let lexbuf = Sedlexing.Utf8.from_string input in
+  ignore (Lexer.tokenize_header lexbuf);
+  let exn_opt =
+    try
+      ignore (Lexer.tokenize_header lexbuf);
+      None
+    with exn -> Some exn
+  in
+  assert_bool "Expected exception on unterminated header string"
+    (Option.is_some exn_opt)
+
+let test_unknown_characters_are_skipped _ctxt =
+  let input = "1. e4 ?! e5 @ 2. Nf3" in
+  let expected =
+    [ NUMBER "1."; MOVE "e4"; MOVE "e5"; NUMBER "2."; MOVE "Nf3"; EOF ]
+  in
+  assert_tokens ~ctxt:_ctxt ~input ~is_header:false ~expected
+
 let suite =
   "lexer tests"
   >::: [
+         "header_unterminated_string_raises"
+         >:: test_header_unterminated_string_raises;
+         "unknown_characters_are_skipped"
+         >:: test_unknown_characters_are_skipped;
          "header_simple" >:: test_header_simple;
          "header_escaped_string" >:: test_header_escaped_string;
          "numbers_and_moves" >:: test_numbers_and_moves;

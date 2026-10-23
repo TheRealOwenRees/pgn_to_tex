@@ -1,13 +1,6 @@
 open OUnit2
 
-let contains ~needle haystack =
-  let n = String.length needle and h = String.length haystack in
-  let rec loop i =
-    if i + n > h then false
-    else if String.sub haystack i n = needle then true
-    else loop (i + 1)
-  in
-  n = 0 || loop 0
+let contains = Helpers.Text_helper.contains
 
 let read_file path =
   let ic = In_channel.open_text path in
