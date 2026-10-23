@@ -45,7 +45,9 @@
    (and
     :with-test))
   ("ocamlformat"
-   (and :with-dev-setup)))
+   (and
+    :with-dev-setup
+    (= 0.29.0))))
  (tags
   ("pgn" "latex" "chess" "parser")))
 

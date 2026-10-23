@@ -38,9 +38,8 @@ let test_path_takes_precedence_over_ply _ctxt =
   let path_fen = "8/8/8/8/8/8/4K3/7k w - - 0 1" in
   let ply_fen = "7k/8/8/8/8/8/8/4K3 b - - 0 1" in
   let json =
-    Printf.sprintf
-      {| [{"fen":"%s","path":["e4","e5"]},{"ply":2,"fen":"%s"}] |} path_fen
-      ply_fen
+    Printf.sprintf {| [{"fen":"%s","path":["e4","e5"]},{"ply":2,"fen":"%s"}] |}
+      path_fen ply_fen
   in
   let diagrams = Pgn_to_tex.parse_diagrams_json json in
   let rendered = Pgn_to_tex.to_tex ~diagram_data:diagrams pgn in
@@ -92,7 +91,8 @@ let test_malformed_json_yields_empty_diagrams _ctxt =
           ~diagram_data:(Pgn_to_tex.parse_diagrams_json json)
           pgn
       in
-      assert_equal ~printer:(fun x -> x)
+      assert_equal
+        ~printer:(fun x -> x)
         ~msg:("malformed JSON: " ^ json)
         expected actual)
     malformed

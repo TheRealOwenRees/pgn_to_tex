@@ -1,0 +1,3 @@
+(documentation
+ (package pgn_to_tex)
+ (mld_files index))

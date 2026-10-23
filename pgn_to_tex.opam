@@ -20,7 +20,7 @@ depends: [
   "ounit2" {with-test & >= "2.2.7"}
   "js_of_ocaml" {with-test}
   "js_of_ocaml-ppx" {with-test}
-  "ocamlformat" {with-dev-setup}
+  "ocamlformat" {with-dev-setup & = "0.29.0"}
   "odoc" {with-doc}
 ]
 build: [
