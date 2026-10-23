@@ -10,10 +10,12 @@ let parse_diagrams_json diagrams_json_str =
     let diagrams_list = to_list json in
     List.fold_left
       (fun acc item ->
-        let ply = item |> member "ply" |> to_int in
         let fen = item |> member "fen" |> to_string in
         let acc =
-          { acc with Ast.by_ply = MoveMap.add ply fen acc.Ast.by_ply }
+          match item |> member "ply" with
+          | `Int ply ->
+              { acc with Ast.by_ply = MoveMap.add ply fen acc.Ast.by_ply }
+          | _ -> acc
         in
         match item |> member "path" with
         | `List path_items ->
