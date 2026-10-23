@@ -16,9 +16,9 @@
 (license AGPL-3.0-or-later)
 
 (documentation
- https://github.com/therealowenrees/pgn_to_tex/blob/main/README.md)
+ https://therealowenrees.github.io/pgn_to_tex/)
 
-(version 0.0.2)
+(version 0.1.0)
 
 (package
  (name pgn_to_tex)
