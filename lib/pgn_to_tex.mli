@@ -25,8 +25,10 @@ val parse_diagrams_json : string -> diagram_data
 (** [parse_diagrams_json json] parses diagram selections from a JSON string.
 
     The input is expected to be a JSON array of objects. Each object contains
-    a [fen] string and may contain a [ply] number and a [path] array of SAN
-    moves. Malformed JSON yields {!empty_diagrams} rather than raising. *)
+    a [fen] string and either a legacy [ply] number, a [path] array of SAN
+    moves, or both. A matching [path] takes precedence; [ply] is the fallback
+    for mainline positions. Malformed JSON yields {!empty_diagrams} rather than
+    raising. *)
 
 val to_tex : ?diagram_data:diagram_data -> ?clock:bool -> string -> string
 (** [to_tex pgn] converts the PGN game in [pgn] to a LaTeX fragment.

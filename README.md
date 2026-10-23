@@ -23,11 +23,35 @@ let diagram_data = parse_diagrams_json diagrams_json_stringified
 let game_tex = to_tex ~diagram_data ~clock:false pgn
 ```
 
-This will return a LaTex markdown representation of the PGN file along with chess board diagrams at the specified ply. Clock times can be rendered for both sides if you pass `~clock:true` to the `to_tex` function.
+This will return a LaTex markdown representation of the PGN file along with chess board diagrams at the specified positions. Clock times can be rendered for both sides if you pass `~clock:true` to the `to_tex` function.
 
-Each diagram is placed at the position identified by its path — the SAN move sequence from the start of the game (e.g. ["d4","d5","e4","d6"]). `path` uniquely identifies positions in both the mainline and in variations, and diagrams inside a variation are rendered inline within that variation. The legacy `ply` field is still accepted and used as a fallback for mainline diagrams when path is omitted.
+### Diagram JSON schema
 
-Variation diagrams are rendered at a slightly smaller size (smallboard) so they don't dominate the subline. Clock times can be rendered for both sides by passing ~clock:true to to_tex.
+`parse_diagrams_json` accepts a JSON array of objects:
+
+```json
+[
+  {"fen": "...", "path": ["d4", "d5", "e4", "d6"]},
+  {"fen": "...", "ply": 5},
+  {"fen": "...", "ply": 9, "path": ["e4", "e5", "Nf3", "Nc6"]}
+]
+```
+
+| Field  | Type            | Required          | Description                                                                                                                        |
+| ------ | --------------- | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `fen`  | string          | yes               | The board position to render.                                                                                                      |
+| `path` | array of string | one of path/ply   | SAN move sequence from the start of the game (e.g. `["d4","d5","e4","d6"]`). It uniquely identifies mainline and variation positions. |
+| `ply`  | integer         | one of path/ply   | Legacy half-move count from the start of the game (1 after White's first move). Used for mainline positions.                        |
+
+Resolution rules:
+
+- An entry may carry `path`, `ply`, or both.
+- When a rendered position has a matching `path`, that diagram takes precedence.
+- If no `path` matches, mainline positions fall back to a matching legacy `ply`.
+- Variation diagrams require `path`; a `ply`-only entry only matches mainline positions.
+- Malformed diagram JSON yields empty diagram data instead of raising.
+
+Diagrams inside a variation are rendered inline within that variation and at a slightly smaller size (`smallboard`) so they don't dominate the subline.
 
 Latex preample and document setup markdown is not included in the output. You will need to add something similar to below around the `game_tex` output to create a valid document:
 
