@@ -41,17 +41,49 @@ game_tex goes here
 
 ## Compile a JavaScript version of the library
 
-With the library installed, you can compile the code to JavaScript by running:
+The JavaScript build is an optional target. Dune skips it when the JavaScript dependencies are not installed. Install them with:
+
+```
+opam install js_of_ocaml js_of_ocaml-ppx
+```
+
+Then compile the code to JavaScript by running:
 
 ```
 make build
 ```
 
-This will generate the JavaScript file at `_build/default/bin/main.bc.js`
+or build just the artifact:
 
-This JavaScript file is minified and in CJS format, working in both Node and in the browser.
+```
+dune build bin/pgn_to_tex_js.bc.js
+```
 
-A single function `to_tex` is exposed, accepting the same arguments as the main library.
+This generates the JavaScript file at `_build/default/bin/pgn_to_tex_js.bc.js`.
+
+This JavaScript file is minified and in CJS format, working in both Node and the browser.
+
+A single global `to_tex` function is exposed, accepting the same three arguments as the main library:
+
+```js
+to_tex(pgnString, diagramJsonString, displayClock);
+```
+
+For example:
+
+```js
+require("./_build/default/bin/pgn_to_tex_js.bc.js");
+
+const gameTex = globalThis.to_tex("1. e4 e5 2. Nf3", "{}", false);
+```
+
+Pass `"{}"` (or an empty string) when there are no diagrams, and `false` to omit clock times. In the browser, the function is available as `window.to_tex` after loading the artifact.
+
+After building the artifact, you can run the Node smoke test with:
+
+```
+node test/js/smoke.js
+```
 
 ## Dependencies
 

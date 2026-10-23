@@ -38,6 +38,12 @@
    (and
     :with-test
     (>= 2.2.7)))
+  (js_of_ocaml
+   (and
+    :with-test))
+  (js_of_ocaml-ppx
+   (and
+    :with-test))
   ("ocamlformat"
    (and :with-dev-setup)))
  (tags
