@@ -1,8 +1,8 @@
 open OUnit2
-open Pgn_logic
+open Pgn_to_tex_internal
 open Ast
-module MoveMap = Pgn2tex.MoveMap
-module PathMap = Pgn2tex.PathMap
+module MoveMap = Ast.MoveMap
+module PathMap = Ast.PathMap
 
 let ae expected actual = assert_equal ~printer:(fun x -> x) expected actual
 
@@ -18,26 +18,21 @@ let contains ~needle haystack =
 let diagram_json_str =
   {| [{"ply":1,"fen":"rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq - 0 1"},{"ply":2,"fen":"rnbqkbnr/ppp1pppp/8/3p4/3P4/8/PPP1PPPP/RNBQKBNR w KQkq - 0 2"}] |}
 
-let diagram_data =
-  {
-    by_ply =
-      MoveMap.empty
-      |> MoveMap.add 5
-           "rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 3"
-      |> MoveMap.add 6
-           "rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 3"
-      |> MoveMap.add 10
-           "r1bqkbnr/pp1ppppp/2n5/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 3 5"
-      |> MoveMap.add 15
-           "r1bqkb1r/pp1ppppp/2n5/2p5/4P3/2N2N2/PPPP1PPP/R1BQKB1R b KQkq - 5 7";
-    by_path = PathMap.empty;
-  }
+let game_diagram_json_str =
+  {| [
+       {"ply":5,"fen":"rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 3"},
+       {"ply":6,"fen":"rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 3"},
+       {"ply":10,"fen":"r1bqkbnr/pp1ppppp/2n5/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 3 5"},
+       {"ply":15,"fen":"r1bqkb1r/pp1ppppp/2n5/2p5/4P3/2N2N2/PPPP1PPP/R1BQKB1R b KQkq - 5 7"}
+     ] |}
+
+let diagram_data = Pgn_to_tex.parse_diagrams_json game_diagram_json_str
 
 let variation_diagram_json_str =
   {| [{"ply":4,"fen":"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1","path":["e4","e5","Nf3","d6"]}] |}
 
 let test_json_str_to_map _ctxt =
-  let result = Pgn2tex.parse_diagrams_json diagram_json_str in
+  let result = Converter.parse_diagrams_json diagram_json_str in
   let actual_bindings = MoveMap.bindings result.by_ply in
 
   let expected_bindings =
@@ -55,7 +50,7 @@ let test_json_str_to_map _ctxt =
   assert_equal expected_bindings actual_bindings ~printer:string_of_bindings
 
 let test_json_path_to_map _ctxt =
-  let result = Pgn2tex.parse_diagrams_json variation_diagram_json_str in
+  let result = Converter.parse_diagrams_json variation_diagram_json_str in
   let actual = PathMap.bindings result.by_path in
   let expected =
     [
@@ -67,12 +62,15 @@ let test_json_path_to_map _ctxt =
 
 let test_variation_diagram_to_tex _ctxt =
   let pgn = "1. e4 e5 2. Nf3 Nc6 (2... d6) 3. Bb5" in
-  let diagrams = Pgn2tex.parse_diagrams_json variation_diagram_json_str in
-  let rendered = Pgn2tex.to_tex pgn ~diagram_data:diagrams ~clock:false in
+  let diagrams = Pgn_to_tex.parse_diagrams_json variation_diagram_json_str in
+  let rendered = Pgn_to_tex.to_tex ~diagram_data:diagrams ~clock:false pgn in
+  let internal_diagrams =
+    Converter.parse_diagrams_json variation_diagram_json_str
+  in
   let diagram =
     match
       Latex_helpers.get_diagram_by_path ~path:"e4 e5 Nf3 d6" ~small:true
-        diagrams
+        internal_diagrams
     with
     | Some d -> d
     | None -> assert_failure "variation diagram not found by path"
@@ -95,7 +93,7 @@ let test_basic_pgn_to_tex _ctxt =
   let filename = "pgn_examples/1.pgn" in
   let ic = In_channel.open_text filename in
   let input_string = In_channel.input_all ic in
-  let actual = Pgn2tex.to_tex input_string ~diagram_data ~clock:false in
+  let actual = Pgn_to_tex.to_tex ~diagram_data ~clock:false input_string in
   let expected =
     {|\title{URS-chJ}
 \author{Ibragimov, Ildar (2455)\\Kramnik, Vladimir (2480)}
@@ -118,7 +116,7 @@ let test_pgn_with_clock_to_tex _ctxt =
   let filename = "pgn_examples/2.pgn" in
   let ic = In_channel.open_text filename in
   let input_string = In_channel.input_all ic in
-  let actual = Pgn2tex.to_tex input_string ~diagram_data ~clock:true in
+  let actual = Pgn_to_tex.to_tex ~diagram_data ~clock:true input_string in
   let expected =
     {|\title{Casual Rapid game}
 \author{montillo2015 (1919)\\reassessyourchess (1869)}
@@ -137,13 +135,27 @@ let test_pgn_with_clock_to_tex _ctxt =
   ae expected actual;
   close_in ic
 
+let test_default_arguments _ctxt =
+  let actual = Pgn_to_tex.to_tex "1. e4 e5" in
+  let expected =
+    "\\title{}\n\\author{}\n\\date{}\\maketitle\n\\newchessgame\n\
+     \\textbf{1.} \\textbf{e4} \\textbf{e5}"
+  in
+  ae expected actual
+
+let test_invalid_pgn_raises _ctxt =
+  assert_raises (Failure "Parse error") (fun () ->
+      ignore (Pgn_to_tex.to_tex "1. e4 e5 (2. Nf3"))
+
 let suite =
-  "pgn2tex tests"
+  "pgn_to_tex tests"
   >::: [
          "json_str_to_map" >:: test_json_str_to_map;
          "json_path_to_map" >:: test_json_path_to_map;
          "variation_diagram_to_tex" >:: test_variation_diagram_to_tex;
          "basic_pgn_to_tex" >:: test_basic_pgn_to_tex;
          "pgn_with_clock_to_tex" >:: test_pgn_with_clock_to_tex;
+         "default_arguments" >:: test_default_arguments;
+         "invalid_pgn_raises" >:: test_invalid_pgn_raises;
        ]
 

@@ -6,7 +6,7 @@ let () =
     >::: [
            Test_lexer.suite;
            Test_latex.suite;
-           Test_pgn2tex.suite;
+           Test_pgn_to_tex.suite;
            Test_nag.suite;
          ]
   in

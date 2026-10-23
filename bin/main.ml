@@ -1,6 +1,5 @@
 open Js_of_ocaml
-open Pgn_logic
-open Ast
+open Pgn_to_tex
 
 let convert_js pgn_js diagram_json_js display_clock =
   let pgn = Js.to_string pgn_js in
@@ -9,11 +8,11 @@ let convert_js pgn_js diagram_json_js display_clock =
   let json_str = Js.to_string diagram_json_js in
 
   let diagram_data =
-    if json_str = "" || json_str = "{}" then Ast.empty_diagrams
-    else Pgn2tex.parse_diagrams_json json_str
+    if json_str = "" || json_str = "{}" then Pgn_to_tex.empty_diagrams
+    else Pgn_to_tex.parse_diagrams_json json_str
   in
 
-  let result = Pgn2tex.to_tex pgn ~diagram_data ~clock:display_clock in
+  let result = Pgn_to_tex.to_tex ~diagram_data ~clock:display_clock pgn in
   Js.string result
 
 (* Exporting the module to the global JavaScript scope *)
