@@ -188,4 +188,3 @@ let suite =
          "clock_in_comment" >:: test_clock_in_comment;
        ]
 
-let () = run_test_tt_main suite

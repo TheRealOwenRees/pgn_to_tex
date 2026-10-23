@@ -147,4 +147,3 @@ let suite =
          "pgn_with_clock_to_tex" >:: test_pgn_with_clock_to_tex;
        ]
 
-let () = run_test_tt_main suite
