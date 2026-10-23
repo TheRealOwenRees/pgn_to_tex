@@ -1,13 +1,6 @@
 open OUnit2
 
-let contains ~needle haystack =
-  let n = String.length needle and h = String.length haystack in
-  let rec loop i =
-    if i + n > h then false
-    else if String.sub haystack i n = needle then true
-    else loop (i + 1)
-  in
-  n = 0 || loop 0
+let contains = Helpers.Text_helper.contains
 
 let path_only_variation_json =
   {| [{"fen":"8/8/8/8/8/8/4K3/7k w - - 0 1","path":["e4","e5","Nf3","d6"]}] |}
@@ -97,6 +90,32 @@ let test_malformed_json_yields_empty_diagrams _ctxt =
         expected actual)
     malformed
 
+let test_mixed_valid_and_invalid_entries_yield_empty _ctxt =
+  let pgn = "1. e4 e5 2. Nf3" in
+  let expected = Pgn_to_tex.to_tex pgn in
+  let valid = {|{"ply":2,"fen":"8/8/8/8/8/8/4K3/7k w - - 0 1"}|} in
+  let invalid_entries =
+    [
+      {|{"ply":3}|};
+      {|{"ply":"not-a-number","fen":"8/8/8/8/8/8/4K3/7k w - - 0 1"}|};
+      {|{"fen":"8/8/8/8/8/8/4K3/7k w - - 0 1","path":[1,2]}|};
+      {|{"fen":42}|};
+    ]
+  in
+  List.iter
+    (fun invalid ->
+      let json = Printf.sprintf "[%s,%s]" valid invalid in
+      let actual =
+        Pgn_to_tex.to_tex
+          ~diagram_data:(Pgn_to_tex.parse_diagrams_json json)
+          pgn
+      in
+      assert_equal
+        ~printer:(fun x -> x)
+        ~msg:("mixed valid/invalid JSON: " ^ json)
+        expected actual)
+    invalid_entries
+
 let suite =
   "diagram resolution tests"
   >::: [
@@ -108,4 +127,6 @@ let suite =
          "ply_only_entry_falls_back" >:: test_ply_only_entry_falls_back;
          "malformed_json_yields_empty_diagrams"
          >:: test_malformed_json_yields_empty_diagrams;
+         "mixed_valid_and_invalid_entries_yield_empty"
+         >:: test_mixed_valid_and_invalid_entries_yield_empty;
        ]

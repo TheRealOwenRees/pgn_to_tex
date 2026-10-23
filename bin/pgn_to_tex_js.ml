@@ -15,9 +15,6 @@ let convert_js pgn_js diagram_json_js display_clock =
   let result = Pgn_to_tex.to_tex ~diagram_data ~clock:display_clock pgn in
   Js.string result
 
-(* Exporting the module to the global JavaScript scope, including when the
-   artifact is loaded as a CommonJS module in Node. *)
-let () =
-  let callback = Js.wrap_callback convert_js in
-  Js.export "to_tex" callback;
-  Js.Unsafe.set Js.Unsafe.global "to_tex" callback
+(* The documented Node and browser contract is a single global [to_tex]
+   function, so setting it on the global object is the only export needed. *)
+let () = Js.Unsafe.set Js.Unsafe.global "to_tex" (Js.wrap_callback convert_js)
