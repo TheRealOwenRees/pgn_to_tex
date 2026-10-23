@@ -27,6 +27,7 @@ jobs:
         uses: ocaml/setup-ocaml@v3
         with:
           ocaml-compiler: 5.4.x
+          cache: false
 
       - name: Install documentation dependencies
         run: opam install . --deps-only --with-doc
