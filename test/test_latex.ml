@@ -1,5 +1,5 @@
 open OUnit2
-open Pgn_logic
+open Pgn_to_tex_internal
 open Ast
 open Helpers
 

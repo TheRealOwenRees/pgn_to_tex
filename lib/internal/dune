@@ -1,0 +1,10 @@
+(library
+ (name pgn_to_tex_internal)
+ (package pgn_to_tex)
+ (libraries sedlex menhirLib yojson)
+ (modules ast parser lexer parsing latex latex_helpers converter nag)
+ (preprocess
+  (pps sedlex.ppx)))
+
+(menhir
+ (modules parser))
