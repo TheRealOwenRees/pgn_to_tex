@@ -138,7 +138,10 @@ let test_pgn_with_clock_to_tex _ctxt =
 let test_default_arguments _ctxt =
   let actual = Pgn_to_tex.to_tex "1. e4 e5" in
   let expected =
-    "\\title{}\n\\author{}\n\\date{}\\maketitle\n\\newchessgame\n\
+    "\\title{}\n\
+     \\author{}\n\
+     \\date{}\\maketitle\n\
+     \\newchessgame\n\
      \\textbf{1.} \\textbf{e4} \\textbf{e5}"
   in
   ae expected actual
@@ -158,4 +161,3 @@ let suite =
          "default_arguments" >:: test_default_arguments;
          "invalid_pgn_raises" >:: test_invalid_pgn_raises;
        ]
-

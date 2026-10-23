@@ -76,11 +76,11 @@ and read_comment_clock buf =
   | clock_val ->
       let time = Utf8.lexeme buf in
       begin match%sedlex buf with
-      | ']' -> begin
-          match%sedlex buf with
+      | ']' ->
+          begin match%sedlex buf with
           | Star white_space, '}' -> CLOCK time
           | _ -> failwith "Expected closing '}' after clock comment"
-        end
+          end
       | _ -> failwith "Malformed clock in comment: expected ']'"
       end
   | _ -> failwith "Malformed clock value"

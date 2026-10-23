@@ -1,0 +1,21 @@
+{0 Pgn_to_tex}
+
+[Pgn_to_tex] converts chess games written in PGN to LaTeX fragments. Move
+numbers, moves, comments, variations, NAGs, and optional diagrams of selected
+positions are rendered into text suitable for inclusion in a larger LaTeX
+document.
+
+{1 Quick start}
+
+{[
+  let tex = Pgn_to_tex.to_tex "1. e4 e5 2. Nf3"
+]}
+
+Pass [~clock:true] to render clock annotations. Pass [~diagram_data] to select
+positions for diagrams; build a selection with
+{!Pgn_to_tex.parse_diagrams_json} or use {!Pgn_to_tex.empty_diagrams} to
+explicitly request a game with no diagrams.
+
+{1 API}
+
+{!modules:Pgn_to_tex}

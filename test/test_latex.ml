@@ -180,4 +180,3 @@ let suite =
          "diagram_clock" >:: test_diagram_clock;
          "no_diagram" >:: test_no_diagram;
        ]
-

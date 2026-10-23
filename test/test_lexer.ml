@@ -187,4 +187,3 @@ let suite =
          "clock_inline" >:: test_clock_inline;
          "clock_in_comment" >:: test_clock_in_comment;
        ]
-
