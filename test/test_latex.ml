@@ -181,4 +181,3 @@ let suite =
          "no_diagram" >:: test_no_diagram;
        ]
 
-let () = run_test_tt_main suite
