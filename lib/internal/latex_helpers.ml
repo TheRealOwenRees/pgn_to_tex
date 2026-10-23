@@ -22,20 +22,22 @@ let build_elo_string elo = if String.length elo > 0 then "(" ^ elo ^ ")" else ""
 
 (* Author string builder *)
 let build_author_string author white black white_elo black_elo =
-  match (author, white, black) with
-  | "", "", "" -> "\\author{}"
-  | "", white, black ->
-      "\\author{" ^ escape_tex white ^ " " ^ build_elo_string white_elo ^ "\\\\"
-      ^ escape_tex black ^ " " ^ build_elo_string black_elo ^ "}"
-  | author, "", "" -> "\\author{" ^ escape_tex author ^ "}"
-  | _ -> ""
+  if author <> "" then "\\author{" ^ escape_tex author ^ "}"
+  else
+    match (white, black) with
+    | "", "" -> "\\author{}"
+    | white, black ->
+        "\\author{" ^ escape_tex white ^ " " ^ build_elo_string white_elo
+        ^ "\\\\" ^ escape_tex black ^ " " ^ build_elo_string black_elo ^ "}"
 
 (* Title string builder *)
 let build_title_string event title subtitle =
   match (event, title, subtitle) with
   | event, "", "" -> "\\title{" ^ escape_tex event ^ "}"
+  | _event, title, "" -> "\\title{" ^ escape_tex title ^ "}"
   | _event, title, subtitle ->
-      "\\title{" ^ title ^ "\\\\[2ex]\\large{" ^ subtitle ^ "}}"
+      "\\title{" ^ escape_tex title ^ "\\\\[2ex]\\large{"
+      ^ escape_tex subtitle ^ "}}"
 
 (* Date and Site string builder *)
 let build_date_site_string date site =

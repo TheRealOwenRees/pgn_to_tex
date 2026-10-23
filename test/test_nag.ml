@@ -19,12 +19,15 @@ let test_direct_nags =
     ("$15" >:: fun _ -> ae "\\bbetter" (nag_to_tex "$15"));
     ("$16" >:: fun _ -> ae "\\ensuremath{\\pm}" (nag_to_tex "$16"));
     ("$17" >:: fun _ -> ae "\\ensuremath{\\mp}" (nag_to_tex "$17"));
+    ("$18" >:: fun _ -> ae "+-" (nag_to_tex "$18"));
+    ("$19" >:: fun _ -> ae "-+" (nag_to_tex "$19"));
     ("$22" >:: fun _ -> ae "\\zugzwang" (nag_to_tex "$22"));
     ("$32" >:: fun _ -> ae "\\development" (nag_to_tex "$32"));
     ("$36" >:: fun _ -> ae "\\initiative" (nag_to_tex "$36"));
     ("$40" >:: fun _ -> ae "\\attack" (nag_to_tex "$40"));
     ("$44" >:: fun _ -> ae "\\compensation" (nag_to_tex "$44"));
     ("$132" >:: fun _ -> ae "\\counterplay" (nag_to_tex "$132"));
+    ("unknown fallback" >:: fun _ -> ae "" (nag_to_tex "$999"));
   ]
 
 let suite = "nag test" >::: [ "direct nags" >::: test_direct_nags ]
