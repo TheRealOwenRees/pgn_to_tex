@@ -18,6 +18,8 @@ depends: [
   "menhir" {>= "20260209"}
   "yojson" {>= "3.0"}
   "ounit2" {with-test & >= "2.2.7"}
+  "js_of_ocaml" {with-test}
+  "js_of_ocaml-ppx" {with-test}
   "ocamlformat" {with-dev-setup}
   "odoc" {with-doc}
 ]

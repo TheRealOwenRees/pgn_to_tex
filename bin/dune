@@ -1,8 +1,7 @@
 (executable
- (name main)
+ (name pgn_to_tex_js)
  (modes js)
+ (optional)
  (libraries pgn_to_tex js_of_ocaml yojson)
  (preprocess
-  (pps js_of_ocaml-ppx))
- (enabled_if
-  (= %{env:CI=false} "false")))
+  (pps js_of_ocaml-ppx)))
