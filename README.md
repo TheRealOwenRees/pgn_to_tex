@@ -29,6 +29,52 @@ Each diagram is placed at the position identified by its path — the SAN move s
 
 Variation diagrams are rendered at a slightly smaller size (smallboard) so they don't dominate the subline. Clock times can be rendered for both sides by passing ~clock:true to to_tex.
 
+## Supported headers
+
+The following PGN headers are rendered:
+
+- `Event` is used as the title when `Title` is absent.
+- `Title` is rendered as the document title. When `Subtitle` is also present it
+  is rendered below the title; a title without a subtitle renders no subtitle
+  block.
+- `Author` is rendered as the author line when present. Otherwise the author
+  line is built from `White` and `Black`, including `WhiteElo` and `BlackElo`
+  when supplied.
+- `Date` and `Site` are combined into the date line. An empty date with a site
+  renders the site; an empty date and site renders an empty date.
+- `Result` is rendered in bold at the end of the game.
+
+All other headers are ignored.
+
+## NAG annotations
+
+The following Numeric Annotation Glyphs are rendered:
+
+| NAG | LaTeX |
+| --- | --- |
+| `$1` | `!` |
+| `$2` | `?` |
+| `$3` | `!!` |
+| `$4` | `??` |
+| `$5` | `!?` |
+| `$6` | `?!` |
+| `$10` | `=` |
+| `$13` | `\infty` |
+| `$14` | `\wbetter` |
+| `$15` | `\bbetter` |
+| `$16` | `\pm` |
+| `$17` | `\mp` |
+| `$18` | `+-` |
+| `$19` | `-+` |
+| `$22` | `\zugzwang` |
+| `$32` | `\development` |
+| `$36` | `\initiative` |
+| `$40` | `\attack` |
+| `$44` | `\compensation` |
+| `$132` | `\counterplay` |
+
+Unmapped NAGs are ignored.
+
 Latex preample and document setup markdown is not included in the output. You will need to add something similar to below around the `game_tex` output to create a valid document:
 
 ```
