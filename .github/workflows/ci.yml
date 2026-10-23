@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Format, build, test, and document
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up OCaml
+        uses: ocaml/setup-ocaml@v3
+        with:
+          ocaml-compiler: 5.4.x
+
+      - name: Install dependencies
+        run: opam install . --deps-only --with-test --with-doc --with-dev-setup
+
+      - name: Check formatting
+        run: opam exec -- dune build @fmt
+
+      - name: Build
+        run: opam exec -- dune build @install
+
+      - name: Run tests
+        run: opam exec -- dune runtest
+
+      - name: Build documentation
+        run: opam exec -- dune build @doc
+
+      - name: Build the JavaScript artifact
+        run: opam exec -- dune build bin/pgn_to_tex_js.bc.js
+
+      - name: Run the Node smoke test
+        run: node test/js/smoke.js
+
+      - name: Lint the opam metadata
+        run: opam lint pgn_to_tex.opam
