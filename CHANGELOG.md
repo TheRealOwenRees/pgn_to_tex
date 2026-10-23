@@ -32,7 +32,6 @@
 
 - A mixed `Author` and player header no longer produces an empty author line.
 - A `Title` without a `Subtitle` no longer emits an empty subtitle block.
-- Empty `Date` and `Site` headers no longer produce comma-only date lines.
 
 ### Changed
 

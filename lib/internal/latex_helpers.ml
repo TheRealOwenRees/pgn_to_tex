@@ -33,11 +33,11 @@ let build_author_string author white black white_elo black_elo =
 (* Title string builder *)
 let build_title_string event title subtitle =
   match (event, title, subtitle) with
-  | event, "", "" -> "\\title{" ^ escape_tex event ^ "}"
-  | _event, title, "" -> "\\title{" ^ escape_tex title ^ "}"
+  | event, "", "" -> "\\title{" ^ event ^ "}"
+  | _event, "", subtitle -> "\\title{" ^ subtitle ^ "}"
+  | _event, title, "" -> "\\title{" ^ title ^ "}"
   | _event, title, subtitle ->
-      "\\title{" ^ escape_tex title ^ "\\\\[2ex]\\large{" ^ escape_tex subtitle
-      ^ "}}"
+      "\\title{" ^ title ^ "\\\\[2ex]\\large{" ^ subtitle ^ "}}"
 
 (* Date and Site string builder *)
 let build_date_site_string date site =

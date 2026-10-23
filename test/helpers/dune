@@ -1,4 +1,4 @@
 (library
  (name helpers)
- (modules latex_helper)
+ (modules latex_helper text_helper)
  (libraries pgn_to_tex_internal))

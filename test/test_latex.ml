@@ -105,6 +105,10 @@ let test_date_site =
       ae "\\date{}" (Latex_helpers.build_date_site_string "" "") );
   ]
 
+let test_escape_tex _ctxt =
+  ae "\\#\\%\\{\\}\\_\\&" (Latex_helpers.escape_tex "#%{}_&");
+  ae "plain text" (Latex_helpers.escape_tex "plain text")
+
 let test_title =
   [
     ( "Event only" >:: fun _ ->
@@ -114,6 +118,15 @@ let test_title =
       ae "\\title{Some title\\\\[2ex]\\large{Some subtitle}}"
         (Latex_helpers.build_title_string "irrelevant" "Some title"
            "Some subtitle") );
+    ( "Title without subtitle" >:: fun _ ->
+      ae "\\title{Some title}"
+        (Latex_helpers.build_title_string "irrelevant" "Some title" "") );
+    ( "Subtitle without title" >:: fun _ ->
+      ae "\\title{Some subtitle}"
+        (Latex_helpers.build_title_string "irrelevant" "" "Some subtitle") );
+    ( "Title is not escaped" >:: fun _ ->
+      ae "\\title{100% & more}"
+        (Latex_helpers.build_title_string "" "100% & more" "") );
   ]
 
 let test_author =
@@ -121,6 +134,9 @@ let test_author =
     ( "Author only" >:: fun _ ->
       ae "\\author{Some author}"
         (Latex_helpers.build_author_string "Some author" "" "" "" "") );
+    ( "Author wins over players" >:: fun _ ->
+      ae "\\author{Carol}"
+        (Latex_helpers.build_author_string "Carol" "Alice" "Bob" "1" "2") );
     ( "Nothing" >:: fun _ ->
       ae "\\author{}" (Latex_helpers.build_author_string "" "" "" "" "") );
   ]
@@ -174,6 +190,7 @@ let suite =
          "diagram_placement" >:: test_diagram_placement;
          "elo tests" >::: test_player_elo;
          "date & site tests" >::: test_date_site;
+         "escape tex" >:: test_escape_tex;
          "title tests" >::: test_title;
          "author tests" >::: test_author;
          "diagram_test" >:: test_diagram;

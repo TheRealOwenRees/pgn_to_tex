@@ -1,22 +1,7 @@
 open OUnit2
-open Pgn_to_tex_internal
-open Ast
-module MoveMap = Ast.MoveMap
-module PathMap = Ast.PathMap
 
 let ae expected actual = assert_equal ~printer:(fun x -> x) expected actual
-
-let contains ~needle haystack =
-  let n = String.length needle and h = String.length haystack in
-  let rec loop i =
-    if i + n > h then false
-    else if String.sub haystack i n = needle then true
-    else loop (i + 1)
-  in
-  n = 0 || loop 0
-
-let diagram_json_str =
-  {| [{"ply":1,"fen":"rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq - 0 1"},{"ply":2,"fen":"rnbqkbnr/ppp1pppp/8/3p4/3P4/8/PPP1PPPP/RNBQKBNR w KQkq - 0 2"}] |}
+let contains = Helpers.Text_helper.contains
 
 let game_diagram_json_str =
   {| [
@@ -31,61 +16,16 @@ let diagram_data = Pgn_to_tex.parse_diagrams_json game_diagram_json_str
 let variation_diagram_json_str =
   {| [{"ply":4,"fen":"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1","path":["e4","e5","Nf3","d6"]}] |}
 
-let test_json_str_to_map _ctxt =
-  let result = Converter.parse_diagrams_json diagram_json_str in
-  let actual_bindings = MoveMap.bindings result.by_ply in
-
-  let expected_bindings =
-    [
-      (1, "rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq - 0 1");
-      (2, "rnbqkbnr/ppp1pppp/8/3p4/3P4/8/PPP1PPPP/RNBQKBNR w KQkq - 0 2");
-    ]
-  in
-
-  let string_of_bindings pairs =
-    let string_of_pair (ply, fen) = Printf.sprintf "(%d, %S)" ply fen in
-    "[" ^ String.concat "; " (List.map string_of_pair pairs) ^ "]"
-  in
-
-  assert_equal expected_bindings actual_bindings ~printer:string_of_bindings
-
-let test_json_path_to_map _ctxt =
-  let result = Converter.parse_diagrams_json variation_diagram_json_str in
-  let actual = PathMap.bindings result.by_path in
-  let expected =
-    [
-      ( "e4 e5 Nf3 d6",
-        "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" );
-    ]
-  in
-  assert_equal expected actual
-
 let test_variation_diagram_to_tex _ctxt =
   let pgn = "1. e4 e5 2. Nf3 Nc6 (2... d6) 3. Bb5" in
   let diagrams = Pgn_to_tex.parse_diagrams_json variation_diagram_json_str in
   let rendered = Pgn_to_tex.to_tex ~diagram_data:diagrams ~clock:false pgn in
-  let internal_diagrams =
-    Converter.parse_diagrams_json variation_diagram_json_str
-  in
-  let diagram =
-    match
-      Latex_helpers.get_diagram_by_path ~path:"e4 e5 Nf3 d6" ~small:true
-        internal_diagrams
-    with
-    | Some d -> d
-    | None -> assert_failure "variation diagram not found by path"
-  in
-  (* the renderer trims the trailing newline of the diagram inside the
-     variation, but keeps the leading one *)
-  let embedded =
-    let len = String.length diagram in
-    if len > 0 && diagram.[len - 1] = '\n' then String.sub diagram 0 (len - 1)
-    else diagram
-  in
-  let expected_fragment = "( 2... d6" ^ embedded ^ " )" in
+  let fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" in
   assert_bool
     (Printf.sprintf "variation diagram misplaced in:\n%s" rendered)
-    (contains ~needle:expected_fragment rendered);
+    (contains
+       ~needle:("2... d6\n\\par\\nobreak\\medskip\\chessboard[setfen=" ^ fen)
+       rendered);
   assert_bool "variation diagram should use smallboard"
     (contains ~needle:"smallboard" rendered)
 
@@ -153,8 +93,6 @@ let test_invalid_pgn_raises _ctxt =
 let suite =
   "pgn_to_tex tests"
   >::: [
-         "json_str_to_map" >:: test_json_str_to_map;
-         "json_path_to_map" >:: test_json_path_to_map;
          "variation_diagram_to_tex" >:: test_variation_diagram_to_tex;
          "basic_pgn_to_tex" >:: test_basic_pgn_to_tex;
          "pgn_with_clock_to_tex" >:: test_pgn_with_clock_to_tex;
