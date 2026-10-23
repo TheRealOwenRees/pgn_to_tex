@@ -9,7 +9,7 @@
 ## Usage
 
 ```ocaml
-open Pgn_logic
+open Pgn_to_tex
 
 let diagrams_json_stringified =
   {| [
@@ -18,9 +18,9 @@ let diagrams_json_stringified =
        {"ply":4,"fen":"rnbqkbnr/ppp1pppp/3p4/8/3PP3/8/PPP2PPP/RNBQKBNR b KQkq - 0 3","path":["d4","d5","e4","d6"]}
      ] |}
 
-let diagram_data = Pgn2tex.parse_diagrams_json diagrams_json_stringified
+let diagram_data = parse_diagrams_json diagrams_json_stringified
 
-let game_tex = Pgn2tex.to_tex pgn ~diagram_data ~clock:false
+let game_tex = to_tex ~diagram_data ~clock:false pgn
 ```
 
 This will return a LaTex markdown representation of the PGN file along with chess board diagrams at the specified ply. Clock times can be rendered for both sides if you pass `~clock:true` to the `to_tex` function.

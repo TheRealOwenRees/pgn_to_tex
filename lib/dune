@@ -1,10 +1,5 @@
 (library
- (name pgn_logic)
+ (name pgn_to_tex)
  (public_name pgn_to_tex)
- (libraries sedlex menhirLib yojson)
- (modules ast parser lexer parsing latex latex_helpers pgn2tex nag)
- (preprocess
-  (pps sedlex.ppx)))
-
-(menhir
- (modules parser))
+ (modules pgn_to_tex)
+ (libraries pgn_to_tex_internal))

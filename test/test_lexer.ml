@@ -1,5 +1,5 @@
 open OUnit2
-open Pgn_logic
+open Pgn_to_tex_internal
 open Parser
 
 let lex_all ?(is_header = false) s =
